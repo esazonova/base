@@ -20,7 +20,7 @@ use crate::TxManagerError;
 /// Pairs the optional cached nonce with a generation counter that
 /// distinguishes "never initialized" (`generation == 0`) from
 /// "cleared by [`NonceManager::reset`]" (`generation > 0`).
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct NonceState {
     /// The cached nonce value, or `None` if uninitialized / reset.
     pub nonce: Option<u64>,
@@ -47,6 +47,19 @@ pub struct NonceState {
     /// Not cleared by [`NonceManager::reset`] — the nonces were never
     /// published and must persist for reuse.
     pub returned_nonces: BTreeSet<u64>,
+}
+
+impl NonceState {
+    /// Returns `true` when the nonce cache has never been populated or has
+    /// been explicitly invalidated by a [`NonceManager::reset`] call.
+    ///
+    /// A `true` result means the next call to
+    /// [`NonceManager::reserve_nonce`] will issue an RPC request to
+    /// re-fetch the account nonce from the chain.
+    #[must_use]
+    pub fn is_uninitialized(&self) -> bool {
+        self.nonce.is_none()
+    }
 }
 
 /// Manages nonce allocation and tracking.
