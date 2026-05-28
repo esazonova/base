@@ -1,4 +1,10 @@
 //! Nonce allocation and tracking.
+//!
+//! The central type is [`NonceManager`], which lazily fetches the account nonce
+//! from the chain on first use and increments it locally for subsequent calls.
+//! The [`NonceGuard`] returned by [`NonceManager::reserve_nonce`] holds the
+//! mutex across the signing / broadcast window so that concurrent tasks never
+//! observe the same nonce.
 
 use std::{collections::BTreeSet, sync::Arc, time::Duration};
 
