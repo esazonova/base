@@ -29,6 +29,7 @@ pub struct TxCandidate {
 
 impl TxCandidate {
     /// Returns `true` when this candidate carries blobs (EIP-4844 type-3 tx).
+    #[must_use]
     pub fn is_blob(&self) -> bool {
         !self.blobs.is_empty()
     }
@@ -50,10 +51,17 @@ mod tests {
     }
 
     #[test]
-    fn candidate_with_blobs_is_type3() {
+    fn is_blob_false_without_blobs() {
+        let candidate = TxCandidate::default();
+        assert!(!candidate.is_blob());
+    }
+
+    #[test]
+    fn is_blob_true_with_blobs() {
         let candidate =
             TxCandidate { blobs: Arc::from(vec![Box::default()]), ..Default::default() };
 
+        assert!(candidate.is_blob(), "candidate with blobs must report is_blob() == true");
         assert_eq!(candidate.blobs.len(), 1);
     }
 
