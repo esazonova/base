@@ -203,6 +203,18 @@ impl FeeOverride {
         self.gas_limit_floor = gas_limit_floor;
         self
     }
+
+    /// Returns `true` when all fields are zero / `None` (i.e. no override is active).
+    ///
+    /// Callers can use this to skip the override-application path entirely
+    /// when no floors have been configured.
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.gas_tip_cap == 0
+            && self.gas_fee_cap == 0
+            && self.blob_fee_cap.is_none()
+            && self.gas_limit_floor == 0
+    }
 }
 
 /// Result of [`crate::SimpleTxManager::increase_gas_price`].
@@ -271,6 +283,28 @@ mod tests {
     use rstest::rstest;
 
     use super::*;
+
+    // ── GasPriceCaps ────────────────────────────────────────────────────
+
+    #[test]
+    // ── FeeOverride ─────────────────────────────────────────────────────
+
+    #[test]
+    fn fee_override_default_is_empty() {
+        assert!(FeeOverride::default().is_empty());
+    }
+
+    #[test]
+    fn fee_override_with_tip_is_not_empty() {
+        let fo = FeeOverride::new(1, 0);
+        assert!(!fo.is_empty());
+    }
+
+    #[test]
+    fn fee_override_with_blob_fee_cap_is_not_empty() {
+        let fo = FeeOverride::default().with_blob_fee_cap(1);
+        assert!(!fo.is_empty());
+    }
 
     // ── GasPriceCaps ────────────────────────────────────────────────────
 
