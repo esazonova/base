@@ -55,6 +55,7 @@ where
     }
 
     /// Returns the size of the channel bank by accumulating over all channels.
+    #[must_use]
     pub fn size(&self) -> usize {
         self.channels.iter().fold(0, |acc, (_, c)| acc + c.size())
     }
